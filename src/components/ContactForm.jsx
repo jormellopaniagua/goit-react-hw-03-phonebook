@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import Form from './styledComponents/Form';
 import Input from './styledComponents/Input';
 import Button from './styledComponents/Button';
-
+import PropTypes from 'prop-types';
 class ContactForm extends Component {
   constructor(props) {
     super(props);
@@ -62,5 +62,8 @@ class ContactForm extends Component {
     );
   }
 }
-
+ContactForm.propTypes = {
+  name: PropTypes.string.isRequired,
+  number: PropTypes.number.isRequired,
+};
 export default ContactForm;

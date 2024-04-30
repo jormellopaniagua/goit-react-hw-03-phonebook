@@ -7,44 +7,44 @@ import Page from './styledComponents/Page';
 export class App extends Component {
   constructor(props) {
     super(props);
-    // Inicialización del estado con los contactos y el filtro
+    // Intenta cargar los contactos desde el localStorage
+    const storedContacts = localStorage.getItem('contacts');
     this.state = {
-      contacts: [
-        { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
-        { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
-        { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
-        { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
-      ],
+      contacts: storedContacts ? JSON.parse(storedContacts) : [],
       filter: '',
     };
   }
 
-  // Método para agregar un nuevo contacto al estado
+  componentDidMount() {
+    // Cuando el componente se monta, verificamos si hay contactos en localStorage y los cargamos en el estado
+    const storedContacts = localStorage.getItem('contacts');
+    if (storedContacts) {
+      this.setState({ contacts: JSON.parse(storedContacts) });
+    }
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    // Cuando el estado de los contactos cambia, actualizamos el localStorage
+    if (prevState.contacts !== this.state.contacts) {
+      localStorage.setItem('contacts', JSON.stringify(this.state.contacts));
+    }
+  }
+
+  componentWillUnmount() {
+    // Cuando el componente se desmonta, no es necesario realizar ninguna acción en este caso
+    // Pero es una buena práctica limpiar cualquier suscripción a eventos o recursos utilizados por el componente
+  }
+
   addContact = newContact => {
     const { contacts } = this.state;
-    // Verificar si el nombre del contacto ya existe en la lista
-    const contactExists = contacts.some(
-      contact => contact.name === newContact.name
-    );
-    // Si el contacto ya existe, mostrar una alerta y no agregarlo
-    if (contactExists) {
-      alert(
-        'Contact name already exists in the phonebook. Please choose a different name.'
-      );
-      return;
-    }
-    // Si el contacto no existe, agregarlo al estado
-    this.setState(prevState => ({
-      contacts: [...prevState.contacts, newContact],
-    }));
+    const updatedContacts = [...contacts, newContact];
+    this.setState({ contacts: updatedContacts });
   };
 
-  // Método para manejar el cambio en el filtro
   handleFilterChange = e => {
     this.setState({ filter: e.target.value });
   };
 
-  // Método para eliminar un contacto del estado
   deleteContact = id => {
     this.setState(prevState => ({
       contacts: prevState.contacts.filter(contact => contact.id !== id),
@@ -53,7 +53,6 @@ export class App extends Component {
 
   render() {
     const { contacts, filter } = this.state;
-    // Filtrar los contactos según el filtro
     const filteredContacts = contacts.filter(contact =>
       contact.name.toLowerCase().includes(filter.toLowerCase())
     );
@@ -61,17 +60,10 @@ export class App extends Component {
     return (
       <Page>
         <h1>Phonebook</h1>
-
-        {/* Componente para agregar un nuevo contacto */}
         <ContactForm onAddContact={this.addContact} />
-
         <div>
           <h2>Contacts</h2>
-
-          {/* Componente para filtrar los contactos */}
           <Filter filter={filter} onChange={this.handleFilterChange} />
-
-          {/* Componente para mostrar la lista de contactos */}
           <ContactList
             contacts={filteredContacts}
             onDeleteContact={this.deleteContact}
